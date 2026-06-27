@@ -1,0 +1,65 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: macos-latest
+            args: --target universal-apple-darwin
+            name: macOS
+          - platform: ubuntu-22.04
+            args: ""
+            name: Linux
+            continue: true
+          - platform: windows-latest
+            args: ""
+            name: Windows
+            continue: true
+    runs-on: ${{ matrix.platform }}
+    continue-on-error: ${{ matrix.continue || false }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Add macOS universal targets
+        if: matrix.platform == 'macos-latest'
+        run: rustup target add aarch64-apple-darwin x86_64-apple-darwin
+      - name: Install Linux dependencies
+        if: matrix.platform == 'ubuntu-22.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev patchelf
+      - name: Install Tauri CLI
+        run: cargo install tauri-cli --version "^2" --locked
+      - name: Fetch assets
+        shell: bash
+        run: ./scripts/fetch-assets.sh
+      - uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          projectPath: src-tauri
+          tagName: ${{ github.ref_name }}
+          releaseName: QStarem Universal ${{ github.ref_name }}
+          releaseBody: |
+            Desktop browser shell for [Z-Stream](https://zstream.mov) with P-Stream userscript injection.
+
+            ### macOS
+            Download the `.dmg` artifact, drag QStarem to Applications, and open from there.
+
+            ### Linux / Windows
+            Community-supported builds when available. Please report platform issues on GitHub.
+
+            Mobile: [QStarem Android](https://github.com/perlytiara/QStarem-Android)
+          releaseDraft: false
+          prerelease: false
+          args: ${{ matrix.args }}

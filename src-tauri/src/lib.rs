@@ -3,15 +3,26 @@ mod extensions;
 mod settings;
 
 use tauri::menu::{Menu, MenuItem, PredefinedMenuItem, Submenu};
-use tauri::{AppHandle, Manager};
+use tauri::{AppHandle, Manager, RunEvent};
 
 use commands::{
-    clear_browsing_data, get_settings, go_home, inject_pstream, navigate_back, navigate_forward,
+    clear_browsing_data, get_settings, go_home, inject_runtime, navigate_back, navigate_forward,
     open_settings, reload_page, save_settings,
 };
 use settings::AppSettings;
 
 fn build_menu(app: &AppHandle) -> tauri::Result<()> {
+    let app_menu = Submenu::with_items(
+        app,
+        "QStarem",
+        true,
+        &[
+            &PredefinedMenuItem::about(app, None, None)?,
+            &PredefinedMenuItem::separator(app)?,
+            &PredefinedMenuItem::quit(app, None)?,
+        ],
+    )?;
+
     let navigation = Submenu::with_items(
         app,
         "Navigation",
@@ -48,7 +59,7 @@ fn build_menu(app: &AppHandle) -> tauri::Result<()> {
         ],
     )?;
 
-    let menu = Menu::with_items(app, &[&navigation, &edit, &view])?;
+    let menu = Menu::with_items(app, &[&app_menu, &navigation, &edit, &view])?;
     app.set_menu(menu)?;
     Ok(())
 }
@@ -97,8 +108,13 @@ pub fn run() {
                     }
                 }
 
-                if let Err(error) = inject_pstream(&window, &settings) {
-                    log::warn!("Initial P-Stream injection failed: {error}");
+                if let Err(error) = inject_runtime(&window, &settings) {
+                    log::warn!("Initial runtime injection failed: {error}");
+                }
+
+                #[cfg(target_os = "macos")]
+                if let Err(error) = extensions::apply_macos_window_theme(&window) {
+                    log::warn!("Failed to apply macOS window theme: {error}");
                 }
             }
 
@@ -110,6 +126,11 @@ pub fn run() {
         .on_menu_event(|app, event| {
             handle_menu_event(app, event.id().0.as_str());
         })
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+        .build(tauri::generate_context!())
+        .expect("error while building tauri application")
+        .run(|app, event| {
+            if let RunEvent::ExitRequested { .. } = event {
+                app.exit(0);
+            }
+        });
 }

@@ -113,7 +113,7 @@ pub fn apply_runtime_settings(app: &AppHandle, settings: &AppSettings) -> Result
     Ok(())
 }
 
-pub fn inject_pstream(window: &WebviewWindow, settings: &AppSettings) -> Result<(), String> {
+pub fn inject_runtime(window: &WebviewWindow, settings: &AppSettings) -> Result<(), String> {
     let script = injection_runner(settings.p_stream_enabled);
     if script.is_empty() {
         return Ok(());

@@ -41,7 +41,7 @@ pub fn go_home(window: WebviewWindow) -> Result<(), String> {
     let home = AppSettings::load().home_url;
     let escaped = home.replace('\\', "\\\\").replace('"', "\\\"");
     window
-        .eval(&format!("window.location.href = \"{escaped}\";"))
+        .eval(format!("window.location.href = \"{escaped}\";"))
         .map_err(|e| e.to_string())
 }
 

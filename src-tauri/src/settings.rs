@@ -2,18 +2,13 @@ use serde::{Deserialize, Serialize};
 
 pub const DEFAULT_HOME_URL: &str = "https://zstream.mov";
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Default)]
 #[serde(rename_all = "lowercase")]
 pub enum AdBlockerChoice {
+    #[default]
     Ublock,
     Adguard,
     None,
-}
-
-impl Default for AdBlockerChoice {
-    fn default() -> Self {
-        Self::Ublock
-    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

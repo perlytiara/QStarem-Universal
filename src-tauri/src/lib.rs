@@ -102,7 +102,7 @@ pub fn run() {
                 }
             }
 
-            build_menu(&app.handle())?;
+            build_menu(app.handle())?;
             let _ = extensions::refresh_cached_userscript();
 
             Ok(())

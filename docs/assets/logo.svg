@@ -1,5 +1,19 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="QStarem logo">
-  <rect width="512" height="512" rx="96" fill="#0A0A0F"/>
-  <circle cx="256" cy="256" r="150" fill="#9B5DE5"/>
-  <path fill="#FF6B9D" d="M208 176 L352 256 L208 336 Z"/>
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#12121a"/>
+      <stop offset="100%" stop-color="#0a0a0f"/>
+    </linearGradient>
+    <linearGradient id="ring" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#b47ef0"/>
+      <stop offset="100%" stop-color="#9b5de5"/>
+    </linearGradient>
+    <linearGradient id="play" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff8fb3"/>
+      <stop offset="100%" stop-color="#ff6b9d"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <circle cx="256" cy="256" r="132" fill="none" stroke="url(#ring)" stroke-width="18"/>
+  <path fill="url(#play)" d="M214 196 L338 256 L214 316 Z"/>
 </svg>

@@ -1,6 +1,7 @@
 use tauri::{AppHandle, Manager, WebviewWindow};
 
 use crate::extensions::{injection_runner, reset_injection_flag_script};
+use crate::icons::apply_app_icon;
 use crate::settings::AppSettings;
 
 #[tauri::command]
@@ -97,6 +98,8 @@ pub fn open_settings(app: AppHandle) -> Result<(), String> {
 }
 
 pub fn apply_runtime_settings(app: &AppHandle, settings: &AppSettings) -> Result<(), String> {
+    apply_app_icon(app, settings.app_icon_id)?;
+
     let Some(window) = app.get_webview_window("main") else {
         return Ok(());
     };

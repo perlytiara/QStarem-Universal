@@ -1,7 +1,7 @@
 # QStarem Universal
 
 <p align="center">
-  <img src="docs/assets/logo.svg" alt="QStarem logo" width="160">
+  <img src="docs/assets/app-icon.png" alt="QStarem app icon (Q Play)" width="128">
 </p>
 
 <p align="center">
@@ -27,7 +27,9 @@ Inspired by community desktop wrappers like [P-Stream Desktop](https://github.co
 - **P-Stream userscript** injected automatically (toggle in settings)
 - **Configurable home URL** (default `https://zstream.mov`)
 - **Native menu** — Back, Forward, Reload, Home, Settings (`Cmd+,`)
-- **Cross-platform builds** — macOS (primary), Linux and Windows via separate CI jobs
+- **Six dock icons** — default **Q Play**, switchable in Settings
+- **Draggable window** — overlay title bar plus edge drag regions on macOS
+- **Cross-platform builds** — macOS (primary), Linux and Windows via CI
 
 ## Platform support
 
@@ -45,13 +47,36 @@ Inspired by community desktop wrappers like [P-Stream Desktop](https://github.co
 2. Open the DMG and drag **QStarem** to Applications.
 3. On first launch, if macOS blocks the app: **System Settings → Privacy & Security → Open Anyway**.
 
-Release builds are unsigned in v1.0.0 (no Apple notarization yet).
+Release builds are unsigned (no Apple notarization yet).
 
 ## Usage
 
 - The main window loads your Z-Stream instance.
 - **Navigation → Settings…** or press `Cmd+,` / `Ctrl+,`.
-- Toggle P-Stream, change home URL, or clear browsing data from settings.
+- Toggle P-Stream, change home URL, pick an app icon, or clear browsing data from settings.
+
+### Moving the window (macOS)
+
+With the overlay title bar, drag from:
+
+- The **top bar** (title strip or site header)
+- **Window edges** (thin strips on left, right, and bottom)
+- The area **to the right of the traffic-light buttons**
+
+### App icon
+
+Default icon is **Q Play**. Open **Settings** (`Cmd+,`) and pick from six icons:
+
+| Icon | Name |
+|------|------|
+| 1 | Q Play (default) |
+| 2 | Film Reel |
+| 3 | Z Waves |
+| 4 | Viewfinder |
+| 5 | Orbital |
+| 6 | Clapper |
+
+The dock icon updates immediately after **Save**.
 
 ## Build from source
 
@@ -82,7 +107,8 @@ cargo tauri build
 ## Project structure
 
 ```text
-src-tauri/src/       Rust shell, settings, P-Stream injection
+src-tauri/src/       Rust shell, settings, P-Stream injection, icon switching
+src-tauri/icons/     App icons (default + variants/)
 ui/                  Settings panel (HTML)
 scripts/             Fetch P-Stream userscript asset
 ```

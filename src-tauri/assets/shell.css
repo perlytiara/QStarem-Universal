@@ -51,3 +51,50 @@ a.qstarem-embedded-exit {
 .qstarem-embedded-exit:active {
   transform: translateY(0) !important;
 }
+
+#qstarem-drag-handles {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 2147483646;
+}
+
+.qstarem-drag-handle {
+  pointer-events: auto;
+  position: fixed;
+  -webkit-app-region: drag;
+}
+
+.qstarem-drag-top {
+  top: 0;
+  left: 72px;
+  right: 0;
+  height: 44px;
+}
+
+.qstarem-drag-left {
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 10px;
+}
+
+.qstarem-drag-right {
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 10px;
+}
+
+.qstarem-drag-bottom {
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 10px;
+}
+
+header[data-tauri-drag-region],
+nav[data-tauri-drag-region],
+.qstarem-drag-header {
+  -webkit-app-region: drag;
+}

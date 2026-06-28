@@ -123,5 +123,6 @@ pub fn apply_macos_window_theme(
     let ns_window = unsafe { &*ns_window_ptr };
     let bg_color = NSColor::colorWithRed_green_blue_alpha(10.0 / 255.0, 10.0 / 255.0, 15.0 / 255.0, 1.0);
     ns_window.setBackgroundColor(Some(&bg_color));
+    ns_window.setMovableByWindowBackground(true);
     Ok(())
 }

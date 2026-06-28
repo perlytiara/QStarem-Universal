@@ -1,6 +1,9 @@
 (function () {
   const EXIT_PATTERN = /choose your exit|leave player|exit player|back to browse|leave watch/i;
   const STYLE_ID = "qstarem-shell-styles";
+  const DRAG_ROOT_ID = "qstarem-drag-handles";
+  const HEADER_DRAG_SELECTORS =
+    "header, nav, [class*='header'], [class*='navbar'], [class*='top-bar']";
 
   function injectStyles() {
     if (document.getElementById(STYLE_ID)) return;
@@ -8,6 +11,28 @@
     css.id = STYLE_ID;
     css.textContent = `/* injected via QStarem shell */`;
     document.head.appendChild(css);
+  }
+
+  function ensureEdgeDragHandles() {
+    if (document.getElementById(DRAG_ROOT_ID)) return;
+
+    const root = document.createElement("div");
+    root.id = DRAG_ROOT_ID;
+    root.innerHTML = `
+      <div class="qstarem-drag-handle qstarem-drag-top" data-tauri-drag-region></div>
+      <div class="qstarem-drag-handle qstarem-drag-left" data-tauri-drag-region></div>
+      <div class="qstarem-drag-handle qstarem-drag-right" data-tauri-drag-region></div>
+      <div class="qstarem-drag-handle qstarem-drag-bottom" data-tauri-drag-region></div>
+    `;
+    document.documentElement.appendChild(root);
+  }
+
+  function applyHeaderDragRegions() {
+    document.querySelectorAll(HEADER_DRAG_SELECTORS).forEach((node) => {
+      if (node.closest(`#${DRAG_ROOT_ID}`)) return;
+      node.setAttribute("data-tauri-drag-region", "deep");
+      node.classList.add("qstarem-drag-header");
+    });
   }
 
   function matchesExitControl(node) {
@@ -45,8 +70,14 @@
   }
 
   function boot() {
+    injectStyles();
+    ensureEdgeDragHandles();
+    applyHeaderDragRegions();
     enhanceExitControls();
-    const observer = new MutationObserver(() => enhanceExitControls());
+    const observer = new MutationObserver(() => {
+      applyHeaderDragRegions();
+      enhanceExitControls();
+    });
     observer.observe(document.documentElement, {
       childList: true,
       subtree: true,
@@ -59,6 +90,12 @@
     boot();
   }
 
-  window.addEventListener("load", enhanceExitControls);
-  window.addEventListener("pageshow", enhanceExitControls);
+  window.addEventListener("load", () => {
+    applyHeaderDragRegions();
+    enhanceExitControls();
+  });
+  window.addEventListener("pageshow", () => {
+    applyHeaderDragRegions();
+    enhanceExitControls();
+  });
 })();

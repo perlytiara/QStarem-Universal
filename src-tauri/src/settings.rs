@@ -19,6 +19,12 @@ pub struct AppSettings {
     pub ad_blocker: AdBlockerChoice,
     #[serde(default = "default_true")]
     pub p_stream_enabled: bool,
+    #[serde(default = "default_app_icon_id")]
+    pub app_icon_id: u8,
+}
+
+fn default_app_icon_id() -> u8 {
+    1
 }
 
 fn default_home_url() -> String {
@@ -35,6 +41,7 @@ impl Default for AppSettings {
             home_url: DEFAULT_HOME_URL.to_string(),
             ad_blocker: AdBlockerChoice::Ublock,
             p_stream_enabled: true,
+            app_icon_id: 1,
         }
     }
 }

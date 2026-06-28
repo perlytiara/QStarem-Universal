@@ -1,5 +1,6 @@
 mod commands;
 mod extensions;
+mod icons;
 mod settings;
 
 use tauri::menu::{Menu, MenuItem, PredefinedMenuItem, Submenu};
@@ -10,6 +11,8 @@ use commands::{
     open_settings, reload_page, save_settings,
 };
 use settings::AppSettings;
+
+use icons::apply_app_icon;
 
 fn build_menu(app: &AppHandle) -> tauri::Result<()> {
     let app_menu = Submenu::with_items(
@@ -100,6 +103,10 @@ pub fn run() {
         ])
         .setup(|app| {
             let settings = AppSettings::load();
+
+            if let Err(error) = apply_app_icon(app.handle(), settings.app_icon_id) {
+                log::warn!("Failed to apply app icon: {error}");
+            }
 
             if let Some(window) = app.get_webview_window("main") {
                 if settings.home_url != settings::DEFAULT_HOME_URL {

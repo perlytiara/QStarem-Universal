@@ -53,10 +53,23 @@ jobs:
           releaseBody: |
             Desktop browser shell for [Z-Stream](https://zstream.mov) with P-Stream userscript injection.
 
+            ### What's new
+
+            - **Q Play icon** — new default dock icon and five alternates, switchable in Settings (`Cmd+,`)
+            - **Draggable window** — overlay title bar plus edge drag regions on macOS
+            - **Site shell** — dark header blending and embedded exit control styling
+            - **Settings** — home URL, P-Stream toggle, app icon picker, clear browsing data
+
             ### macOS
+
             Download the `.dmg` artifact, drag QStarem to Applications, and open from there.
 
+            **Move the window:** drag the top bar, site header, or window edges (left, right, bottom).
+
+            **Change icon:** Navigation → Settings… → App icon → Save.
+
             ### Linux / Windows
+
             Community-supported builds when available. Please report platform issues on GitHub.
 
             Mobile: [QStarem Android](https://github.com/perlytiara/QStarem-Android)

@@ -1,6 +1,6 @@
 [package]
 name = "qstarem-universal"
-version = "1.0.1"
+version = "1.0.2"
 description = "Desktop browser shell for Z-Stream with P-Stream userscript injection"
 authors = ["perlytiara"]
 license = "MIT"
@@ -22,8 +22,10 @@ toml = "0.8"
 directories = "5.0"
 ureq = { version = "3", default-features = false, features = ["rustls"] }
 log = "0.4"
-tauri = { version = "2.11.3", features = [] }
+tauri = { version = "2.11.3", features = ["image-png"] }
 tauri-plugin-log = "2"
 
 [target.'cfg(target_os = "macos")'.dependencies]
-objc2-app-kit = { version = "0.3.2", features = ["NSColor", "NSWindow"] }
+objc2 = "0.6.3"
+objc2-app-kit = { version = "0.3.2", features = ["NSColor", "NSWindow", "NSApplication", "NSImage"] }
+objc2-foundation = "0.3.2"

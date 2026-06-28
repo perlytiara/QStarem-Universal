@@ -55,7 +55,7 @@ jobs:
 
             ### What's new
 
-            - **macOS icon shape** — Cmd+Tab, Dock, and Finder now use proper rounded app icons (`.icns` with transparent corners)
+            - **macOS icon shape** — full-bleed rounded Q Play icon in Cmd+Tab, Dock, and Finder (no white square plate)
             - **Q Play icon** — default dock icon and five alternates, switchable in Settings (`Cmd+,`)
             - **Draggable window** — overlay title bar plus edge drag regions on macOS
             - **Site shell** — dark header blending and embedded exit control styling

@@ -46,6 +46,7 @@ jobs:
       - uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
         with:
           projectPath: src-tauri
           tagName: ${{ github.ref_name }}
@@ -55,6 +56,7 @@ jobs:
 
             ### What's new
 
+            - **Auto-updates** — checks GitHub Releases on launch, downloads in the background, prompts to install and restart
             - **macOS icon shape** — full-bleed rounded Q Play icon in Cmd+Tab, Dock, and Finder (no white square plate)
             - **Q Play icon** — default dock icon and five alternates, switchable in Settings (`Cmd+,`)
             - **Draggable window** — overlay title bar plus edge drag regions on macOS

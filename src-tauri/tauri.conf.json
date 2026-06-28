@@ -1,7 +1,7 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "QStarem",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "identifier": "com.qstarem.universal",
   "build": {
     "frontendDist": "../ui",
@@ -33,6 +33,7 @@
   "bundle": {
     "active": true,
     "targets": "all",
+    "createUpdaterArtifacts": true,
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
@@ -50,5 +51,13 @@
       "icons/icon.icns",
       "icons/variants/*"
     ]
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDgxRUZDQUQ1QTc1N0U4QTAKUldTZzZGZW4xY3J2Z1dMYmtxSlRJa09MUVBjQ2dsVWxDeEVIamhmcG0rL3NsQ05NdXRzMUVSbWMK",
+      "endpoints": [
+        "https://github.com/perlytiara/QStarem-Universal/releases/latest/download/latest.json"
+      ]
+    }
   }
 }

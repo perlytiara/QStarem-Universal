@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Update available</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="panel update-prompt">
+      <h1>Update ready</h1>
+      <p id="version">A new version of QStarem has been downloaded.</p>
+      <p class="hint">Install now to restart with the latest build, or choose Later and install from Settings.</p>
+      <div class="actions">
+        <button id="installUpdate" class="primary" type="button">Install and restart</button>
+        <button id="laterUpdate" type="button">Later</button>
+      </div>
+    </main>
+    <script>
+      const { invoke } = window.__TAURI__.core;
+
+      document.getElementById("installUpdate").addEventListener("click", async () => {
+        await invoke("install_pending_update");
+      });
+
+      document.getElementById("laterUpdate").addEventListener("click", async () => {
+        await invoke("dismiss_update_prompt");
+      });
+    </script>
+  </body>
+</html>

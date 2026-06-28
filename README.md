@@ -49,11 +49,21 @@ Inspired by community desktop wrappers like [P-Stream Desktop](https://github.co
 
 Release builds are unsigned (no Apple notarization yet).
 
+## Auto-updates
+
+QStarem checks [GitHub Releases](https://github.com/perlytiara/QStarem-Universal/releases/latest) on launch.
+
+1. If a newer signed build is available, it downloads in the background.
+2. When ready, a prompt offers **Install and restart** or **Later**.
+3. Open **Navigation → Settings…** (`Cmd+,` / `Ctrl+,`) for version info, manual **Check for updates**, and install when a download is ready.
+
+Updates replace the app bundle in place. Gatekeeper behavior is unchanged from a manual install.
+
 ## Usage
 
 - The main window loads your Z-Stream instance.
 - **Navigation → Settings…** or press `Cmd+,` / `Ctrl+,`.
-- Toggle P-Stream, change home URL, pick an app icon, or clear browsing data from settings.
+- Toggle P-Stream, change home URL, pick an app icon, check for updates, or clear browsing data from settings.
 
 ### Moving the window (macOS)
 

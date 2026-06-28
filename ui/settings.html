@@ -44,12 +44,22 @@
         </label>
       </section>
 
+      <section>
+        <h2>Updates</h2>
+        <p class="hint">QStarem checks GitHub Releases on launch and downloads updates in the background.</p>
+        <p id="updateStatus" class="update-status">Checking version…</p>
+        <div class="actions update-actions">
+          <button id="checkUpdates" type="button">Check for updates</button>
+          <button id="installUpdate" class="primary" type="button" hidden>Install and restart</button>
+        </div>
+      </section>
+
       <div class="actions">
         <button id="save" class="primary" type="button">Save</button>
         <button id="clearData" type="button">Clear browsing data</button>
       </div>
 
-      <footer>QStarem 1.0.4 · Rust/Tauri · Z-Stream · P-Stream</footer>
+      <footer>QStarem 1.0.5 · Rust/Tauri · Z-Stream · P-Stream</footer>
     </main>
     <script src="settings.js"></script>
   </body>

@@ -1,4 +1,5 @@
 const { invoke } = window.__TAURI__.core;
+const { listen } = window.__TAURI__.event;
 
 const DEFAULT_HOME_URL = "https://zstream.mov";
 
@@ -8,6 +9,9 @@ const pStreamEnabled = document.getElementById("pStreamEnabled");
 const iconChoices = document.getElementById("iconChoices");
 const saveButton = document.getElementById("save");
 const clearDataButton = document.getElementById("clearData");
+const updateStatus = document.getElementById("updateStatus");
+const checkUpdatesButton = document.getElementById("checkUpdates");
+const installUpdateButton = document.getElementById("installUpdate");
 
 const ICON_OPTIONS = [
   { id: 1, label: "Q Play" },
@@ -61,6 +65,19 @@ function renderIconChoices() {
   });
 }
 
+function renderUpdateStatus(status) {
+  const version = status.current_version || "unknown";
+  const message = status.message || `Current version: v${version}`;
+  updateStatus.textContent = message;
+  installUpdateButton.hidden = status.phase !== "ready";
+  checkUpdatesButton.disabled = status.phase === "checking" || status.phase === "downloading";
+}
+
+async function refreshUpdateStatus() {
+  const status = await invoke("get_update_status");
+  renderUpdateStatus(status);
+}
+
 async function loadSettings() {
   const settings = await invoke("get_settings");
   homeUrl.value = settings.home_url;
@@ -68,6 +85,7 @@ async function loadSettings() {
   selectedIconId = settings.app_icon_id || 1;
   setAdBlocker(settings.ad_blocker);
   renderIconChoices();
+  await refreshUpdateStatus();
 }
 
 async function saveSettings() {
@@ -91,6 +109,28 @@ saveButton.addEventListener("click", async () => {
 
 clearDataButton.addEventListener("click", async () => {
   await invoke("clear_browsing_data");
+});
+
+checkUpdatesButton.addEventListener("click", async () => {
+  checkUpdatesButton.disabled = true;
+  try {
+    const status = await invoke("check_for_updates");
+    renderUpdateStatus(status);
+  } catch (error) {
+    updateStatus.textContent = `Update check failed: ${error}`;
+  } finally {
+    checkUpdatesButton.disabled = false;
+  }
+});
+
+installUpdateButton.addEventListener("click", async () => {
+  await invoke("install_pending_update");
+});
+
+listen("update-status-changed", (event) => {
+  renderUpdateStatus(event.payload);
+}).catch((error) => {
+  console.error("Failed to listen for update status", error);
 });
 
 loadSettings().catch((error) => {

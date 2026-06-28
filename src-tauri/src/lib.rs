@@ -2,6 +2,7 @@ mod commands;
 mod extensions;
 mod icons;
 mod settings;
+mod updater;
 
 use tauri::menu::{Menu, MenuItem, PredefinedMenuItem, Submenu};
 use tauri::{AppHandle, Manager, RunEvent};
@@ -11,6 +12,10 @@ use commands::{
     open_settings, reload_page, save_settings,
 };
 use settings::AppSettings;
+use updater::{
+    check_for_updates, dismiss_update_prompt, get_app_version, get_update_status,
+    install_pending_update, spawn_startup_update_check, UpdateController,
+};
 
 use icons::apply_app_icon;
 
@@ -91,6 +96,9 @@ fn handle_menu_event(app: &AppHandle, event_id: &str) {
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_log::Builder::default().build())
+        .plugin(tauri_plugin_process::init())
+        .plugin(tauri_plugin_updater::Builder::new().build())
+        .manage(UpdateController::new())
         .invoke_handler(tauri::generate_handler![
             get_settings,
             save_settings,
@@ -100,6 +108,11 @@ pub fn run() {
             go_home,
             clear_browsing_data,
             open_settings,
+            get_app_version,
+            get_update_status,
+            check_for_updates,
+            install_pending_update,
+            dismiss_update_prompt,
         ])
         .setup(|app| {
             let settings = AppSettings::load();
@@ -127,6 +140,7 @@ pub fn run() {
 
             build_menu(app.handle())?;
             let _ = extensions::refresh_cached_userscript();
+            spawn_startup_update_check(app.handle());
 
             Ok(())
         })

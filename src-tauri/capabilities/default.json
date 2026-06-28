@@ -2,13 +2,16 @@
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
   "description": "Default QStarem permissions",
-  "windows": ["main", "settings"],
+  "windows": ["main", "settings", "update-prompt"],
   "permissions": [
     "core:default",
     "core:window:allow-create",
     "core:window:allow-set-focus",
+    "core:window:allow-close",
     "core:webview:allow-create-webview-window",
     "core:menu:default",
-    "log:default"
+    "log:default",
+    "updater:default",
+    "process:default"
   ]
 }

@@ -1,8 +1,14 @@
 use std::sync::Mutex;
+use std::time::Duration;
 
 use serde::Serialize;
 use tauri::{AppHandle, Emitter, Manager, State};
 use tauri_plugin_updater::UpdaterExt;
+use tokio::sync::Mutex as AsyncMutex;
+use tokio::time::timeout;
+
+const CHECK_TIMEOUT: Duration = Duration::from_secs(45);
+const DOWNLOAD_TIMEOUT: Duration = Duration::from_secs(60 * 30);
 
 #[derive(Clone, Serialize, Default)]
 #[serde(rename_all = "snake_case")]
@@ -33,6 +39,7 @@ struct PendingUpdate {
 pub struct UpdateController {
     status: Mutex<UpdateStatus>,
     pending: Mutex<Option<PendingUpdate>>,
+    operation: AsyncMutex<()>,
 }
 
 impl UpdateController {
@@ -43,6 +50,7 @@ impl UpdateController {
                 ..Default::default()
             }),
             pending: Mutex::new(None),
+            operation: AsyncMutex::new(()),
         }
     }
 
@@ -61,12 +69,10 @@ impl UpdateController {
             .unwrap_or_default()
     }
 
-    pub fn has_pending_install(&self) -> bool {
-        self.pending.lock().map(|guard| guard.is_some()).unwrap_or(false)
-    }
-
     pub async fn check_and_download(app: AppHandle, manual: bool) -> Result<(), String> {
         let controller = app.state::<UpdateController>();
+        let _operation_guard = controller.operation.lock().await;
+
         controller.set_status(
             &app,
             UpdateStatus {
@@ -80,28 +86,57 @@ impl UpdateController {
             },
         );
 
-        let Some(update) = app
+        let updater = app
             .updater()
-            .map_err(|error| error.to_string())?
-            .check()
-            .await
-            .map_err(|error| error.to_string())?
-        else {
-            if let Ok(mut pending) = controller.pending.lock() {
-                *pending = None;
+            .map_err(|error| format!("Updater unavailable: {error}"))?;
+
+        let update = match timeout(CHECK_TIMEOUT, updater.check()).await {
+            Ok(Ok(Some(update))) => update,
+            Ok(Ok(None)) => {
+                if let Ok(mut pending) = controller.pending.lock() {
+                    *pending = None;
+                }
+                controller.set_status(
+                    &app,
+                    UpdateStatus {
+                        phase: UpdatePhase::Idle,
+                        message: Some(format!(
+                            "You're up to date (v{}).",
+                            env!("CARGO_PKG_VERSION")
+                        )),
+                        available_version: None,
+                        notes: None,
+                        progress: 0.0,
+                        ..controller.snapshot()
+                    },
+                );
+                return Ok(());
             }
-            controller.set_status(
-                &app,
-                UpdateStatus {
-                    phase: UpdatePhase::Idle,
-                    message: Some("You're up to date.".into()),
-                    available_version: None,
-                    notes: None,
-                    progress: 0.0,
-                    ..controller.snapshot()
-                },
-            );
-            return Ok(());
+            Ok(Err(error)) => {
+                let message = format!("Update check failed: {error}");
+                controller.set_status(
+                    &app,
+                    UpdateStatus {
+                        phase: UpdatePhase::Error,
+                        message: Some(message.clone()),
+                        ..controller.snapshot()
+                    },
+                );
+                return Err(message);
+            }
+            Err(_) => {
+                let message: String =
+                    "Update check timed out. Try again from the QStarem menu.".into();
+                controller.set_status(
+                    &app,
+                    UpdateStatus {
+                        phase: UpdatePhase::Error,
+                        message: Some(message.clone()),
+                        ..controller.snapshot()
+                    },
+                );
+                return Err(message);
+            }
         };
 
         let version = update.version.clone();
@@ -121,25 +156,50 @@ impl UpdateController {
 
         let app_for_progress = app.clone();
         let mut downloaded = 0usize;
-        let bytes = update
-            .download(
-                |chunk_length, content_length| {
-                    downloaded += chunk_length;
-                    let controller = app_for_progress.state::<UpdateController>();
-                    let progress = match content_length {
-                        Some(total) if total > 0 => downloaded as f32 / total as f32,
-                        _ => 0.0,
-                    };
-                    let mut snapshot = controller.snapshot();
-                    snapshot.phase = UpdatePhase::Downloading;
-                    snapshot.progress = progress.clamp(0.0, 1.0);
-                    snapshot.message = Some(format!("Downloading QStarem {version}…"));
-                    controller.set_status(&app_for_progress, snapshot);
-                },
-                || {},
-            )
-            .await
-            .map_err(|error| error.to_string())?;
+        let download_future = update.download(
+            |chunk_length, content_length| {
+                downloaded += chunk_length;
+                let controller = app_for_progress.state::<UpdateController>();
+                let progress = match content_length {
+                    Some(total) if total > 0 => downloaded as f32 / total as f32,
+                    _ => 0.0,
+                };
+                let mut snapshot = controller.snapshot();
+                snapshot.phase = UpdatePhase::Downloading;
+                snapshot.progress = progress.clamp(0.0, 1.0);
+                snapshot.message = Some(format!("Downloading QStarem {version}…"));
+                controller.set_status(&app_for_progress, snapshot);
+            },
+            || {},
+        );
+
+        let bytes = match timeout(DOWNLOAD_TIMEOUT, download_future).await {
+            Ok(Ok(bytes)) => bytes,
+            Ok(Err(error)) => {
+                let message = format!("Update download failed: {error}");
+                controller.set_status(
+                    &app,
+                    UpdateStatus {
+                        phase: UpdatePhase::Error,
+                        message: Some(message.clone()),
+                        ..controller.snapshot()
+                    },
+                );
+                return Err(message);
+            }
+            Err(_) => {
+                let message: String = "Update download timed out. Try again later.".into();
+                controller.set_status(
+                    &app,
+                    UpdateStatus {
+                        phase: UpdatePhase::Error,
+                        message: Some(message.clone()),
+                        ..controller.snapshot()
+                    },
+                );
+                return Err(message);
+            }
+        };
 
         if let Ok(mut pending) = controller.pending.lock() {
             *pending = Some(PendingUpdate { update, bytes });
@@ -223,8 +283,23 @@ pub fn get_update_status(controller: State<UpdateController>) -> UpdateStatus {
 
 #[tauri::command]
 pub async fn check_for_updates(app: AppHandle) -> Result<UpdateStatus, String> {
-    UpdateController::check_and_download(app.clone(), true).await?;
-    Ok(app.state::<UpdateController>().snapshot())
+    let snapshot = app.state::<UpdateController>().snapshot();
+    if matches!(snapshot.phase, UpdatePhase::Checking | UpdatePhase::Downloading) {
+        return Ok(snapshot);
+    }
+
+    let handle = app.clone();
+    tauri::async_runtime::spawn(async move {
+        if let Err(error) = UpdateController::check_and_download(handle.clone(), true).await {
+            log::warn!("Manual update check failed: {error}");
+        }
+    });
+
+    Ok(UpdateStatus {
+        phase: UpdatePhase::Checking,
+        message: Some("Checking for updates…".into()),
+        ..snapshot
+    })
 }
 
 #[tauri::command]

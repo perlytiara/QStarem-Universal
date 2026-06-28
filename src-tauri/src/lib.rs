@@ -26,6 +26,7 @@ fn build_menu(app: &AppHandle) -> tauri::Result<()> {
         true,
         &[
             &PredefinedMenuItem::about(app, None, None)?,
+            &MenuItem::with_id(app, "check_updates", "Check for Updates…", true, None::<&str>)?,
             &PredefinedMenuItem::separator(app)?,
             &PredefinedMenuItem::quit(app, None)?,
         ],
@@ -73,6 +74,16 @@ fn build_menu(app: &AppHandle) -> tauri::Result<()> {
 }
 
 fn handle_menu_event(app: &AppHandle, event_id: &str) {
+    if event_id == "check_updates" {
+        let handle = app.clone();
+        tauri::async_runtime::spawn(async move {
+            if let Err(error) = crate::updater::UpdateController::check_and_download(handle, true).await {
+                log::error!("Menu update check failed: {error}");
+            }
+        });
+        return;
+    }
+
     let Some(window) = app.get_webview_window("main") else {
         return;
     };

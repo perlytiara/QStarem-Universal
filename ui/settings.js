@@ -67,7 +67,12 @@ function renderIconChoices() {
 
 function renderUpdateStatus(status) {
   const version = status.current_version || "unknown";
-  const message = status.message || `Current version: v${version}`;
+  let message = status.message || `Current version: v${version}`;
+
+  if (status.phase === "downloading" && status.progress > 0) {
+    message = `${message} ${Math.round(status.progress * 100)}%`;
+  }
+
   updateStatus.textContent = message;
   installUpdateButton.hidden = status.phase !== "ready";
   checkUpdatesButton.disabled = status.phase === "checking" || status.phase === "downloading";
@@ -112,14 +117,11 @@ clearDataButton.addEventListener("click", async () => {
 });
 
 checkUpdatesButton.addEventListener("click", async () => {
-  checkUpdatesButton.disabled = true;
   try {
     const status = await invoke("check_for_updates");
     renderUpdateStatus(status);
   } catch (error) {
     updateStatus.textContent = `Update check failed: ${error}`;
-  } finally {
-    checkUpdatesButton.disabled = false;
   }
 });
 
@@ -133,6 +135,17 @@ listen("update-status-changed", (event) => {
   console.error("Failed to listen for update status", error);
 });
 
+async function loadFooterVersion() {
+  const footer = document.getElementById("appFooter");
+  if (!footer) return;
+  const version = await invoke("get_app_version");
+  footer.textContent = `QStarem ${version} · Rust/Tauri · Z-Stream · P-Stream`;
+}
+
 loadSettings().catch((error) => {
   console.error("Failed to load settings", error);
+});
+
+loadFooterVersion().catch((error) => {
+  console.error("Failed to load app version", error);
 });

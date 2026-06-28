@@ -192,13 +192,22 @@ footer {
 }
 
 .update-actions {
-  margin-top: 12px;
+  margin-top: 16px;
+  padding-top: 12px;
+  gap: 14px;
 }
 
-.update-prompt h1 {
-  margin-top: 0;
+button.update-install-btn,
+.update-actions button.primary,
+.update-prompt .actions button.primary {
+  padding: 16px 22px;
+  margin-top: 4px;
+  min-height: 50px;
+  font-size: 1rem;
 }
 
 .update-prompt .actions {
-  margin-top: 20px;
+  margin-top: 28px;
+  padding-top: 8px;
+  gap: 14px;
 }

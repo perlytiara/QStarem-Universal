@@ -280,7 +280,7 @@
             <p id="qstarem-app-version" class="qstarem-update-version">QStarem</p>
             <p id="qstarem-update-status" class="qstarem-update-status">Tap below to check for updates.</p>
             <button type="button" class="qstarem-settings-link" id="qstarem-check-updates">Check for updates</button>
-            <button type="button" class="qstarem-settings-primary qstarem-update-install" id="qstarem-install-update" hidden>Install update</button>
+            <button type="button" class="qstarem-settings-primary qstarem-update-install update-install-btn" id="qstarem-install-update" hidden>Install update</button>
           </div>
         </div>
         <footer class="qstarem-settings-footer">

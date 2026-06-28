@@ -12,6 +12,7 @@ jobs:
   publish:
     strategy:
       fail-fast: false
+      max-parallel: 1
       matrix:
         include:
           - platform: macos-latest
@@ -69,7 +70,7 @@ jobs:
 
             **Move the window:** drag the top bar, site header, or window edges (left, right, bottom).
 
-            **Change icon:** Navigation → Settings… → App icon → Save.
+            **Change icon:** QStarem → Settings… → App icon → Save, or Z-Stream hamburger menu → **App settings**.
 
             ### Linux / Windows
 

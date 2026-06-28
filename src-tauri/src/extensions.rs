@@ -1,6 +1,7 @@
 const EMBEDDED_USERSCRIPT: &str = include_str!("../assets/p-stream.user.js");
 const EMBEDDED_SHELL_CSS: &str = include_str!("../assets/shell.css");
 const EMBEDDED_SHELL_JS: &str = include_str!("../assets/shell.js");
+const EMBEDDED_BRIDGE_JS: &str = include_str!("../assets/bridge.js");
 
 pub fn userscript_source() -> String {
     let cache_path = cached_userscript_path();
@@ -60,8 +61,33 @@ pub fn shell_injection_script() -> String {
     )
 }
 
+pub fn bridge_injection_script() -> String {
+    let js = escape_for_js_literal(EMBEDDED_BRIDGE_JS);
+
+    format!(
+        r#"(function() {{
+  function qstaremInjectBridge() {{
+    if (window.__qstaremBridgeInjected) return;
+    window.__qstaremBridgeInjected = true;
+    try {{
+      const source = "{js}";
+      const el = document.createElement("script");
+      el.textContent = source;
+      (document.head || document.documentElement).appendChild(el);
+    }} catch (error) {{
+      console.error("[QStarem] bridge injection failed", error);
+    }}
+  }}
+
+  qstaremInjectBridge();
+  window.addEventListener("load", qstaremInjectBridge);
+  window.addEventListener("pageshow", qstaremInjectBridge);
+}})();"#
+    )
+}
+
 pub fn injection_runner(p_stream_enabled: bool) -> String {
-    let mut parts = vec![shell_injection_script()];
+    let mut parts = vec![shell_injection_script(), bridge_injection_script()];
 
     if p_stream_enabled {
         let source = userscript_source();
@@ -92,7 +118,7 @@ pub fn injection_runner(p_stream_enabled: bool) -> String {
 }
 
 pub fn reset_injection_flag_script() -> &'static str {
-    "window.__qstaremPStreamInjected = false; window.__qstaremShellInjected = false;"
+    "window.__qstaremPStreamInjected = false; window.__qstaremShellInjected = false; window.__qstaremBridgeInjected = false;"
 }
 
 pub fn refresh_cached_userscript() -> Result<(), String> {

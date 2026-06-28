@@ -98,3 +98,222 @@ nav[data-tauri-drag-region],
 .qstarem-drag-header {
   -webkit-app-region: drag;
 }
+
+.qstarem-hidden-exit {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+#qstarem-return-item,
+#qstarem-settings-item {
+  list-style: none;
+}
+
+#qstarem-settings-item {
+  cursor: pointer;
+}
+
+body.qstarem-settings-open {
+  overflow: hidden;
+}
+
+#qstarem-settings-panel {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483645;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+}
+
+#qstarem-settings-panel[hidden] {
+  display: none !important;
+}
+
+.qstarem-settings-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(4px);
+}
+
+.qstarem-settings-sheet {
+  position: relative;
+  width: min(100%, 26rem);
+  max-height: min(88vh, 640px);
+  overflow: auto;
+  border-radius: 1rem;
+  border: 1px solid rgba(155, 93, 229, 0.28);
+  background: #12121a;
+  color: #f5f5fa;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.45);
+}
+
+.qstarem-settings-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1rem 0.5rem;
+}
+
+.qstarem-settings-header h2 {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 700;
+}
+
+.qstarem-settings-close {
+  border: none;
+  background: transparent;
+  color: #c8c8d5;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.qstarem-settings-body {
+  display: grid;
+  gap: 0.85rem;
+  padding: 0.5rem 1rem 1rem;
+}
+
+.qstarem-settings-field {
+  display: grid;
+  gap: 0.45rem;
+  margin: 0;
+  border: none;
+  padding: 0;
+}
+
+.qstarem-settings-field span,
+.qstarem-settings-field legend {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #d8d8e4;
+}
+
+.qstarem-settings-field input[type="url"] {
+  width: 100%;
+  box-sizing: border-box;
+  border-radius: 0.65rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: #0a0a0f;
+  color: #f5f5fa;
+  padding: 0.65rem 0.75rem;
+}
+
+.qstarem-settings-field label {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-size: 0.9375rem;
+}
+
+.qstarem-settings-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.qstarem-settings-link {
+  justify-self: start;
+  border: none;
+  background: transparent;
+  color: #9b5de5;
+  font-size: 0.8125rem;
+  cursor: pointer;
+  padding: 0;
+}
+
+.qstarem-settings-footer {
+  display: grid;
+  gap: 0.55rem;
+  padding: 0 1rem 1rem;
+}
+
+.qstarem-settings-primary,
+.qstarem-settings-secondary {
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.qstarem-settings-primary {
+  border: 1px solid rgba(155, 93, 229, 0.45);
+  background: rgba(155, 93, 229, 0.22);
+  color: #ffffff;
+}
+
+.qstarem-settings-secondary {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: transparent;
+  color: #d8d8e4;
+}
+
+.qstarem-icon-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.55rem;
+}
+
+.qstarem-icon-choice {
+  display: grid;
+  gap: 0.35rem;
+  justify-items: center;
+  padding: 0.55rem 0.35rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  color: #f5f5fa;
+  cursor: pointer;
+}
+
+.qstarem-icon-choice[aria-pressed="true"] {
+  border-color: rgba(155, 93, 229, 0.75);
+  box-shadow: 0 0 0 1px rgba(155, 93, 229, 0.45);
+}
+
+.qstarem-icon-choice img {
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 0.85rem;
+}
+
+.qstarem-icon-choice span {
+  font-size: 0.72rem;
+  color: #b8b8c8;
+  text-align: center;
+}
+
+.qstarem-update-section {
+  gap: 0.45rem;
+}
+
+.qstarem-update-version {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #f5f5fa;
+}
+
+.qstarem-update-status {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: #b8b8c8;
+  line-height: 1.4;
+}
+
+.qstarem-update-install {
+  width: 100%;
+}

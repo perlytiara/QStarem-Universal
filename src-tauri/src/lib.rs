@@ -26,6 +26,7 @@ fn build_menu(app: &AppHandle) -> tauri::Result<()> {
         true,
         &[
             &PredefinedMenuItem::about(app, None, None)?,
+            &MenuItem::with_id(app, "settings", "Settings…", true, Some("CmdOrCtrl+,"))?,
             &MenuItem::with_id(app, "check_updates", "Check for Updates…", true, None::<&str>)?,
             &PredefinedMenuItem::separator(app)?,
             &PredefinedMenuItem::quit(app, None)?,
@@ -41,8 +42,6 @@ fn build_menu(app: &AppHandle) -> tauri::Result<()> {
             &MenuItem::with_id(app, "forward", "Forward", true, Some("CmdOrCtrl+]"))?,
             &MenuItem::with_id(app, "reload", "Reload", true, Some("CmdOrCtrl+R"))?,
             &MenuItem::with_id(app, "home", "Home", true, Some("CmdOrCtrl+Shift+H"))?,
-            &PredefinedMenuItem::separator(app)?,
-            &MenuItem::with_id(app, "settings", "Settings…", true, Some("CmdOrCtrl+,"))?,
         ],
     )?;
 
@@ -84,6 +83,13 @@ fn handle_menu_event(app: &AppHandle, event_id: &str) {
         return;
     }
 
+    if event_id == "settings" {
+        if let Err(error) = open_settings(app.clone()) {
+            log::error!("Menu action failed: {error}");
+        }
+        return;
+    }
+
     let Some(window) = app.get_webview_window("main") else {
         return;
     };
@@ -93,7 +99,6 @@ fn handle_menu_event(app: &AppHandle, event_id: &str) {
         "forward" => navigate_forward(window),
         "reload" => reload_page(window),
         "home" => go_home(window),
-        "settings" => open_settings(app.clone()),
         "clear_data" => clear_browsing_data(app.clone()),
         _ => Ok(()),
     };

@@ -19,11 +19,27 @@
     <script>
       const { invoke } = window.__TAURI__.core;
 
-      document.getElementById("installUpdate").addEventListener("click", async () => {
-        await invoke("install_pending_update");
+      const installButton = document.getElementById("installUpdate");
+      const laterButton = document.getElementById("laterUpdate");
+      const versionText = document.getElementById("version");
+
+      installButton.addEventListener("click", async () => {
+        installButton.disabled = true;
+        laterButton.disabled = true;
+        installButton.textContent = "Installing…";
+        versionText.textContent = "Installing update. QStarem will restart when ready.";
+
+        try {
+          await invoke("install_pending_update");
+        } catch (error) {
+          installButton.disabled = false;
+          laterButton.disabled = false;
+          installButton.textContent = "Install and restart";
+          versionText.textContent = `Install failed: ${error}`;
+        }
       });
 
-      document.getElementById("laterUpdate").addEventListener("click", async () => {
+      laterButton.addEventListener("click", async () => {
         await invoke("dismiss_update_prompt");
       });
     </script>

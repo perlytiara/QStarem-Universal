@@ -17,6 +17,7 @@ pub enum UpdatePhase {
     Idle,
     Checking,
     Downloading,
+    Installing,
     Ready,
     Error,
 }
@@ -223,6 +224,7 @@ impl UpdateController {
 
     pub async fn install_ready_update(app: AppHandle) -> Result<(), String> {
         let controller = app.state::<UpdateController>();
+
         let pending = controller
             .pending
             .lock()
@@ -230,12 +232,45 @@ impl UpdateController {
             .take()
             .ok_or_else(|| "No downloaded update is ready to install.".to_string())?;
 
-        pending
-            .update
-            .install(&pending.bytes)
-            .map_err(|error| error.to_string())?;
+        controller.set_status(
+            &app,
+            UpdateStatus {
+                phase: UpdatePhase::Installing,
+                message: Some("Installing update…".into()),
+                ..controller.snapshot()
+            },
+        );
+
+        if let Some(window) = app.get_webview_window("update-prompt") {
+            let _ = window.close();
+        }
+        if let Some(window) = app.get_webview_window("settings") {
+            let _ = window.close();
+        }
+
+        let install_result = tauri::async_runtime::spawn_blocking(move || {
+            pending
+                .update
+                .install(&pending.bytes)
+                .map_err(|error| error.to_string())
+        })
+        .await
+        .map_err(|error| format!("Install task failed: {error}"))?;
+
+        if let Err(error) = install_result {
+            controller.set_status(
+                &app,
+                UpdateStatus {
+                    phase: UpdatePhase::Error,
+                    message: Some(format!("Update install failed: {error}")),
+                    ..controller.snapshot()
+                },
+            );
+            return Err(error);
+        }
 
         app.restart();
+        Ok(())
     }
 }
 

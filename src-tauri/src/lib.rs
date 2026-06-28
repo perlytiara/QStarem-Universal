@@ -4,6 +4,9 @@ mod icons;
 mod settings;
 mod updater;
 
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
+
 use tauri::menu::{Menu, MenuItem, PredefinedMenuItem, Submenu};
 use tauri::{AppHandle, Manager, RunEvent};
 
@@ -110,6 +113,9 @@ fn handle_menu_event(app: &AppHandle, event_id: &str) {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    let restart_after_exit = Arc::new(AtomicBool::new(false));
+    let restart_flag = restart_after_exit.clone();
+
     tauri::Builder::default()
         .plugin(tauri_plugin_log::Builder::default().build())
         .plugin(tauri_plugin_process::init())
@@ -165,9 +171,20 @@ pub fn run() {
         })
         .build(tauri::generate_context!())
         .expect("error while building tauri application")
-        .run(|app, event| {
-            if let RunEvent::ExitRequested { .. } = event {
-                app.exit(0);
+        .run(move |app, event| {
+            match event {
+                RunEvent::ExitRequested { code, .. } => {
+                    if code == Some(tauri::RESTART_EXIT_CODE) {
+                        restart_flag.store(true, Ordering::SeqCst);
+                    }
+                }
+                RunEvent::Exit => {
+                    if restart_flag.load(Ordering::SeqCst) {
+                        app.cleanup_before_exit();
+                        tauri::process::restart(&app.env());
+                    }
+                }
+                _ => {}
             }
         });
 }

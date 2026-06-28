@@ -75,7 +75,17 @@ function renderUpdateStatus(status) {
 
   updateStatus.textContent = message;
   installUpdateButton.hidden = status.phase !== "ready";
-  checkUpdatesButton.disabled = status.phase === "checking" || status.phase === "downloading";
+  checkUpdatesButton.disabled =
+    status.phase === "checking" ||
+    status.phase === "downloading" ||
+    status.phase === "installing";
+  installUpdateButton.disabled = status.phase === "installing";
+  if (status.phase === "installing") {
+    installUpdateButton.textContent = "Installing…";
+    installUpdateButton.hidden = false;
+  } else {
+    installUpdateButton.textContent = "Install and restart";
+  }
 }
 
 async function refreshUpdateStatus() {
@@ -126,7 +136,16 @@ checkUpdatesButton.addEventListener("click", async () => {
 });
 
 installUpdateButton.addEventListener("click", async () => {
-  await invoke("install_pending_update");
+  installUpdateButton.disabled = true;
+  installUpdateButton.textContent = "Installing…";
+  updateStatus.textContent = "Installing update. QStarem will restart when ready.";
+  try {
+    await invoke("install_pending_update");
+  } catch (error) {
+    installUpdateButton.disabled = false;
+    installUpdateButton.textContent = "Install and restart";
+    updateStatus.textContent = `Install failed: ${error}`;
+  }
 });
 
 listen("update-status-changed", (event) => {

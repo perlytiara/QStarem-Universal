@@ -322,10 +322,21 @@
       }
     });
     panel.querySelector("#qstarem-install-update").addEventListener("click", async () => {
-      closeSettingsPanel();
+      const installBtn = panel.querySelector("#qstarem-install-update");
+      const statusEl = panel.querySelector("#qstarem-update-status");
+      installBtn.disabled = true;
+      installBtn.textContent = "Installing…";
+      if (statusEl) {
+        statusEl.textContent = "Installing update. QStarem will restart when ready.";
+      }
       try {
         await invoke("install_pending_update");
       } catch (error) {
+        installBtn.disabled = false;
+        installBtn.textContent = "Install update";
+        if (statusEl) {
+          statusEl.textContent = `Install failed: ${error}`;
+        }
         console.error("[QStarem] install_pending_update failed", error);
       }
     });
@@ -354,7 +365,9 @@
     }
 
     statusEl.textContent = message;
-    installBtn.hidden = phase !== "ready";
+    installBtn.hidden = phase !== "ready" && phase !== "installing";
+    installBtn.disabled = phase === "installing";
+    installBtn.textContent = phase === "installing" ? "Installing…" : "Install update";
   }
 
   async function populateSettingsPanel() {
